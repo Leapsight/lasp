@@ -341,25 +341,6 @@ handle_info(Msg, State) ->
     _ = lager:warning("Unhandled messages: ~p", [Msg]),
     {noreply, State}.
 
-sync_backend(GossipPeers, ObjectFilterFun, Store) ->
-  Members = case ?SYNC_BACKEND:broadcast_tree_mode() of
-              true ->
-                GossipPeers;
-              false ->
-                {ok, Members1} = ?SYNC_BACKEND:membership(),
-                Members1
-            end,
-  Peers = ?SYNC_BACKEND:compute_exchange(?SYNC_BACKEND:without_me(Members)),
-  SyncFun = fun(Peer) ->
-    case lasp_config:get(reverse_topological_sync, ?REVERSE_TOPOLOGICAL_SYNC) of
-      true ->
-        init_reverse_topological_sync(Peer, ObjectFilterFun, Store);
-      false ->
-        init_state_sync(Peer, ObjectFilterFun, false, Store)
-    end
-            end,
-  lists:foreach(SyncFun, Peers).
-
 %% @private
 -spec terminate(term(), #state{}) -> term().
 terminate(_Reason, _State) ->
