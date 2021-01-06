@@ -42,4 +42,6 @@ start(_StartType, _StartArgs) ->
 
 %% @doc Stop the lasp application.
 stop(_State) ->
-    ok.
+    ObjectFilterFun = fun(_, _) -> true end,
+    SyncBackend = whereis(lasp_state_based_synchronization_backend),
+    ok = gen_server:call(SyncBackend, {{state_sync, ObjectFilterFun}}).
