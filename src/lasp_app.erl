@@ -42,4 +42,8 @@ start(_StartType, _StartArgs) ->
 
 %% @doc Stop the lasp application.
 stop(_State) ->
+    ObjectFilterFun = fun(_, _) -> true end,
+    SyncBackend = erlang:whereis(lasp_state_based_synchronization_backend),
+    R = gen_server:call(SyncBackend, {state_sync, ObjectFilterFun}),
+    logger:info("Result from lasp sync backend: ~p", [R]),
     ok.
